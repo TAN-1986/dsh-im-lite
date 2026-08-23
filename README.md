@@ -6,7 +6,7 @@
 > - 本版改动:**仅保留微信 + QQ 两个渠道**,移除飞书、钉钉、企业微信、Slack、Telegram、Discord、WhatsApp、AI Office 等其余平台
 > - 新增:**微信推送告警功能**(2026-08-23,由本项目作者新增,非上游功能)
 
-让 DeepSeek Harness 通过微信 / QQ 触手可及——手机直接对话、收发消息,harness 内的任意系统(如量化监控)可通过微信推送告警。
+让 DeepSeek Harness 通过微信 / QQ 触手可及——手机直接对话、收发消息、推送告警信息到手机端。
 
 ## 功能
 
@@ -38,7 +38,7 @@ dsh plugin --profile web add link:$(pwd)/dsh-im-lite
 绑定微信机器人后,harness 内任意 agent/脚本可调用 `im-send` 工具向 owner 推送消息:
 
 ```
-im-send: "量化系统告警: BTC 价格突破 70000"
+im-send: "今天签到已完成"
 ```
 
 - 发送目标是绑定时的 owner(扫码者)或配置的 `ownerUserId`
