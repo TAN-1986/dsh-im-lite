@@ -499,7 +499,13 @@ export function createWeixinApi({ fetchImpl = fetch } = {}) {
         },
       });
       if (response?.ret !== undefined && response.ret !== 0) {
-        throw new WeixinApiError('send-rejected', '微信服务拒绝了回复消息。');
+        const detail = JSON.stringify({
+          ret: response.ret,
+          errcode: response.errcode,
+          errmsg: response.errmsg,
+          message_id: response.message_id,
+        });
+        throw new WeixinApiError('send-rejected', `微信服务拒绝了回复消息。raw=${detail}`);
       }
       return true;
     },

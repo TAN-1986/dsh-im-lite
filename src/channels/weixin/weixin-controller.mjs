@@ -121,6 +121,7 @@ export class WeixinController {
   #transitions = new Map();
   #revision = 0;
   #closed = false;
+  #watchdog = null;
 
   constructor({
     api,
@@ -184,6 +185,7 @@ export class WeixinController {
         }
       });
     }
+    this.#startWatchdog();
     return this.status();
   }
 
@@ -427,8 +429,29 @@ export class WeixinController {
   async close() {
     if (this.#closed) return;
     this.#closed = true;
+    if (this.#watchdog) {
+      clearInterval(this.#watchdog);
+      this.#watchdog = null;
+    }
     if (this.#activeAttemptId) await this.cancelProvisioning(this.#activeAttemptId);
     await Promise.allSettled([...this.#runtimes.keys()].map((botId) => this.#stopRuntime(botId)));
+  }
+
+  /**
+   * Watchdog（2026-08-26）— 定期检查已配置账号的 runtime 是否存活。
+   * 长轮询因网络抖动/微信服务端断连失败 3 次后 runtime 会停止（#runMonitor throw），
+   * 此前没有任何自动恢复机制，导致主动推送（sendToOwner）在长时间无消息后失败
+   * （微信返回 prepare failed）。这里每 60s 尝试拉起缺失的 runtime。
+   */
+  #startWatchdog() {
+    if (this.#watchdog || this.#closed) return;
+    const WATCHDOG_INTERVAL_MS = 60_000;
+    this.#watchdog = setInterval(() => {
+      void this.initialize().catch((error) => {
+        this.#logger.warn?.('[dsh-weixin] watchdog recovery pass failed:', error);
+      });
+    }, WATCHDOG_INTERVAL_MS);
+    this.#watchdog.unref?.();
   }
 
   async #runProvisioning(record) {

@@ -6,6 +6,7 @@ const EMPTY_STATE = Object.freeze({
   sessions: {},
   seenMessageIds: [],
   getUpdatesBuf: '',
+  contextToken: '',
 });
 
 function normalizeState(value) {
@@ -25,6 +26,7 @@ function normalizeState(value) {
       ? value.seenMessageIds.filter((id) => typeof id === 'string').slice(-1_000)
       : [],
     getUpdatesBuf: typeof value.getUpdatesBuf === 'string' ? value.getUpdatesBuf : '',
+    contextToken: typeof value.contextToken === 'string' ? value.contextToken : '',
   };
 }
 
@@ -82,6 +84,16 @@ export class WeixinStateStore {
 
   getUpdatesBuf() {
     return this.#state.getUpdatesBuf;
+  }
+
+  contextToken() {
+    return this.#state.contextToken;
+  }
+
+  async setContextToken(value) {
+    if (typeof value !== 'string' || value.trim() === '' || value === this.#state.contextToken) return;
+    this.#state.contextToken = value.trim();
+    await this.#persist();
   }
 
   async setGetUpdatesBuf(value) {

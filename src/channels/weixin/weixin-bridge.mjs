@@ -202,6 +202,10 @@ export class WeixinHarnessBridge {
     const key = conversationKey(sender);
     const contextToken = nonEmptyString(message?.context_token) ?? undefined;
     const runId = nonEmptyString(message?.run_id) ?? undefined;
+    // 持久化最近一次 context_token:主动推送(sendToOwner)依赖它,长时间无消息后会失效
+    if (contextToken) {
+      void this.#state.setContextToken(contextToken).catch(() => undefined);
+    }
     const pending = this.#pendingInteractions.get(key);
     const commandText = nonEmptyString(extractWeixinText(message)) ?? '';
     const commandRunner = isControlCommand(commandText)

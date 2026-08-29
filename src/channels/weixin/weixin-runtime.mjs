@@ -321,11 +321,13 @@ export class WeixinRuntime {
         ? this.#config.ownerUserId.trim()
         : null;
     if (!toUserId) throw connectionTestTargetUnavailable('微信机器人');
+    const contextToken = this.#state.contextToken();
     await this.#api.sendText({
       baseUrl: this.#config.baseUrl,
       token: this.#token,
       toUserId,
       text,
+      contextToken,
       signal: this.#abortController?.signal,
     });
     return { sent: true };
