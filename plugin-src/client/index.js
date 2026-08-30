@@ -1,12 +1,8 @@
 import * as React from 'react';
 
 import {
-  QqLogoGlyph,
   WeixinLogoGlyph,
 } from './channel-logos.js';
-import { QQ_RPC_CHANNEL } from './channels/qq/api.js';
-import { QqSettingsTab } from './channels/qq/index.js';
-import { installQqStyles } from './channels/qq/styles.js';
 import { WeixinSettingsTab } from './channels/weixin/index.js';
 import { WEIXIN_RPC_CHANNEL } from './channels/weixin/api.js';
 import { installWeixinStyles } from './channels/weixin/styles.js';
@@ -19,7 +15,6 @@ export const inject = ['slots', 'connection', 'locale', 'workspaces'];
 
 const CHANNELS = Object.freeze([
   { id: 'weixin', label: '微信' },
-  { id: 'qq', label: 'QQ' },
 ]);
 
 function WeixinLogo() {
@@ -27,17 +22,12 @@ function WeixinLogo() {
     h(WeixinLogoGlyph));
 }
 
-function QqLogo() {
-  return h('span', { className: 'dim-logo dim-logoQq', 'aria-hidden': 'true' }, h(QqLogoGlyph));
-}
-
 function ChannelLogo({ channel }) {
   if (channel === 'weixin') return h(WeixinLogo);
-  return h(QqLogo);
+  return null;
 }
 
 export function IMSettingsTab({
-  qqRpcCall,
   weixinRpcCall,
   workspaceDirectoryPicker,
 }) {
@@ -92,7 +82,7 @@ export function IMSettingsTab({
         'aria-labelledby': `dim-tab-${active.id}`,
       }, active.id === 'weixin'
         ? h(WeixinSettingsTab, { rpcCall: weixinRpcCall })
-        : h(QqSettingsTab, { rpcCall: qqRpcCall })),
+        : null),
     ),
   ));
 }
@@ -108,7 +98,6 @@ export function apply(ctx) {
   ctx.effect(() => {
     const disposers = [
       installWeixinStyles(),
-      installQqStyles(),
       installImStyles(),
     ];
     return () => {
@@ -118,8 +107,6 @@ export function apply(ctx) {
 
   const weixinRpcCall = (endpoint, payload, signal) =>
     ctx.connection.rpc.call(WEIXIN_RPC_CHANNEL, endpoint, payload, signal);
-  const qqRpcCall = (endpoint, payload, signal) =>
-    ctx.connection.rpc.call(QQ_RPC_CHANNEL, endpoint, payload, signal);
   const workspaceDirectoryPicker = Object.freeze({
     listDirectory: (path, signal) => ctx.workspaces.listDirectory(path, signal),
     pickDirectory: () => ctx.workspaces.pickDirectory(),
@@ -132,7 +119,6 @@ export function apply(ctx) {
     label: () => t('IM机器人'),
     locale: IM_LOCALE_NAMESPACE,
     inject: () => ({
-      qqRpcCall,
       weixinRpcCall,
       workspaceDirectoryPicker,
     }),

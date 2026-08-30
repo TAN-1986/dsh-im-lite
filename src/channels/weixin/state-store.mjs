@@ -96,6 +96,16 @@ export class WeixinStateStore {
     await this.#persist();
   }
 
+  /**
+   * 清除缓存的 context_token（stale context token 恢复：prepare failed 后
+   * 先删 token 再做无 token 重试，避免每次重试都带过期 token 撞墙）。
+   */
+  async clearContextToken() {
+    if (this.#state.contextToken === '') return;
+    this.#state.contextToken = '';
+    await this.#persist();
+  }
+
   async setGetUpdatesBuf(value) {
     if (typeof value !== 'string' || value === this.#state.getUpdatesBuf) return;
     this.#state.getUpdatesBuf = value;

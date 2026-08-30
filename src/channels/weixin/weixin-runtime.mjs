@@ -321,8 +321,11 @@ export class WeixinRuntime {
         ? this.#config.ownerUserId.trim()
         : null;
     if (!toUserId) throw connectionTestTargetUnavailable('微信机器人');
-    const contextToken = this.#state.contextToken();
-    await this.#api.sendText({
+
+    // 带缓存的 context_token 发送；token 过期时微信返回 ret=-2 "prepare failed"
+    // （stale context token，与限流不同）。此时清除缓存的 token 后做一次无 token
+    // 重试：bot 长轮询在线且账号有效时，无 token 的主动发送可以成功。
+    const sendOnce = (contextToken) => this.#api.sendText({
       baseUrl: this.#config.baseUrl,
       token: this.#token,
       toUserId,
@@ -330,6 +333,45 @@ export class WeixinRuntime {
       contextToken,
       signal: this.#abortController?.signal,
     });
-    return { sent: true };
+
+    const contextToken = this.#state.contextToken();
+    try {
+      await sendOnce(contextToken);
+      return { sent: true };
+    } catch (error) {
+      if (!isStaleContextTokenError(error)) throw error;
+      // stale context token: 清除缓存后无 token 重试一次（不消耗调用方重试预算）
+      await this.#state.clearContextToken().catch(() => undefined);
+      try {
+        await sendOnce(undefined);
+        return { sent: true };
+      } catch (retryError) {
+        if (isStaleContextTokenError(retryError)) {
+          throw new WeixinApiError(
+            'stale-session',
+            '微信会话已过期（sendmessage 无有效 context_token），需要用户给机器人发一条消息重新激活；'
+            + '已清除缓存 token，收到新消息后会自动恢复。',
+            { cause: retryError },
+          );
+        }
+        throw retryError;
+      }
+    }
   }
+}
+
+/**
+ * sendmessage 返回 ret=-2 / errcode=-2 且 errmsg 为 "prepare failed" 或
+ * "unknown error"（或 errcode=-14）时，判定为 stale context_token 而非限流。
+ * 参考 hermes-agent #17228 / PR #80426 的修复语义。
+ */
+function isStaleContextTokenError(error) {
+  if (!(error instanceof WeixinApiError) || error.code !== 'send-rejected') return false;
+  const detail = error.providerDetail ?? {};
+  const ret = detail.ret;
+  const errcode = detail.errcode;
+  const errmsg = typeof detail.errmsg === 'string' ? detail.errmsg.toLowerCase() : '';
+  if (ret !== -2 && errcode !== -2 && errcode !== -14) return false;
+  return errmsg.includes('prepare failed') || errmsg.includes('unknown error')
+    || errmsg.includes('session timeout');
 }

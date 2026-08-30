@@ -1,4 +1,3 @@
-import { apply as applyQq } from './channels/qq/index.mjs';
 import { apply as applyWeixin } from './channels/weixin/index.mjs';
 import { installSendMessage } from './channels/shared/send-message.mjs';
 import { installOutboundArtifactTool } from '../../src/channels/shared/semantic/artifact.mjs';
@@ -19,7 +18,6 @@ function channelConfig(config, name) {
 }
 
 export function createImHostPlugin(internals = {}) {
-  const startQq = internals.applyQq ?? applyQq;
   const startWeixin = internals.applyWeixin ?? applyWeixin;
   return Object.freeze({
     name,
@@ -32,7 +30,6 @@ export function createImHostPlugin(internals = {}) {
       } else {
         installOutboundArtifactTool(ctx);
       }
-      await startQq(ctx, channelConfig(config, 'qq'));
       // 微信: 拿 controller 注册通用告警发送（HTTP 端点 + agent Tool）
       const weixinHandle = await startWeixin(ctx, channelConfig(config, 'weixin'));
       if (weixinHandle?.controller && typeof weixinHandle.controller.sendMessage === 'function') {

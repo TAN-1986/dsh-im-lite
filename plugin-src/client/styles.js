@@ -38,8 +38,6 @@ const CSS = String.raw`
 .dim-logoFeishu svg { width: 28px; height: 28px; }
 .dim-logoDingtalk { color: white; background: #1677ff; }
 .dim-logoDingtalk svg { width: 24px; height: 24px; }
-.dim-logoQq { color: white; background: #1677ff; }
-.dim-logoQq svg { width: 21px; height: 21px; }
 .dim-logoWecom { background: white; border: 1px solid var(--dsw-alias-border-l2, #e5e6eb); }
 .dim-logoWecom svg { width: 22px; height: 22px; }
 .dim-logoTelegram { color: white; background: #229ed9; }

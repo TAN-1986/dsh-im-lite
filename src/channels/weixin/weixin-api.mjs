@@ -38,6 +38,7 @@ export class WeixinApiError extends Error {
     this.code = code;
     this.status = options.status;
     this.providerCode = options.providerCode;
+    this.providerDetail = options.providerDetail;
   }
 }
 
@@ -499,13 +500,17 @@ export function createWeixinApi({ fetchImpl = fetch } = {}) {
         },
       });
       if (response?.ret !== undefined && response.ret !== 0) {
-        const detail = JSON.stringify({
+        const detail = {
           ret: response.ret,
           errcode: response.errcode,
           errmsg: response.errmsg,
           message_id: response.message_id,
-        });
-        throw new WeixinApiError('send-rejected', `微信服务拒绝了回复消息。raw=${detail}`);
+        };
+        throw new WeixinApiError(
+          'send-rejected',
+          `微信服务拒绝了回复消息。raw=${JSON.stringify(detail)}`,
+          { providerCode: String(response.ret ?? ''), providerDetail: detail },
+        );
       }
       return true;
     },

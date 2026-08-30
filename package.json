@@ -77,11 +77,6 @@
   "engines": {
     "node": ">=22.19"
   },
-  "dependencies": {
-    "@tencent-connect/qqbot-connector": "1.2.0",
-    "@tencent-connect/qqbot-nodejs": "1.0.4",
-    "qrcode": "1.5.4"
-  },
   "devDependencies": {
     "@larksuiteoapi/node-sdk": "1.73.0",
     "@whiskeysockets/baileys": "7.0.0-rc14",

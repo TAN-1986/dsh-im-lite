@@ -7,11 +7,7 @@ import { build } from 'esbuild';
 const sourceDirectory = dirname(fileURLToPath(import.meta.url));
 const packageRoot = resolve(sourceDirectory, '../..');
 const outputPath = resolve(packageRoot, 'lib/index.js');
-const externalRuntimePackages = [
-  '@tencent-connect/qqbot-connector',
-  '@tencent-connect/qqbot-nodejs',
-  'qrcode',
-];
+const externalRuntimePackages = [];
 const external = externalRuntimePackages.flatMap((name) => [name, `${name}/*`]);
 
 await mkdir(dirname(outputPath), { recursive: true });
