@@ -7,7 +7,9 @@ import { build } from 'esbuild';
 const sourceDirectory = dirname(fileURLToPath(import.meta.url));
 const packageRoot = resolve(sourceDirectory, '../..');
 const outputPath = resolve(packageRoot, 'lib/client.js');
-const loaderId = process.env.DSH_IM_CLIENT_ID ?? '@xmanrui/dsh-im';
+// 必须与 cordis.patch.yml 的插件 name 一致（@xmanrui/dsh-im-lite），否则
+// harness 加载 client bundle 时报 "loaded without registering" 错误。
+const loaderId = process.env.DSH_IM_CLIENT_ID ?? '@xmanrui/dsh-im-lite';
 
 const result = await build({
   entryPoints: [resolve(sourceDirectory, 'index.js')],
