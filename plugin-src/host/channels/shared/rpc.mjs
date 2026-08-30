@@ -85,12 +85,6 @@ function operationError(channel, error) {
   if (error?.code === 'webhook-configured') {
     return { code: 'webhook-configured', message: error.message };
   }
-  if (error?.code === 'telegram-401' || error?.code === 'discord-401') {
-    return { code: 'invalid-token', message: `${channel} Bot Token 无效，请重新填写。` };
-  }
-  if (error?.code === 'discord-intents') {
-    return { code: 'discord-intents', message: error.message };
-  }
   return { code: `${channel.toLowerCase()}-operation-failed`, message: `${channel} 操作失败，请稍后重试。` };
 }
 

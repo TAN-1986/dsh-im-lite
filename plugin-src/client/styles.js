@@ -30,26 +30,8 @@ const CSS = String.raw`
 .dim-channel:hover { border-color: color-mix(in srgb, var(--dim-blue) 25%, var(--dsw-alias-border-l2, #eef0f3)); background: color-mix(in srgb, var(--dim-blue) 2%, var(--dsw-alias-bg-layer-3, #fff)); box-shadow: 0 5px 16px rgb(31 35 41 / 5%); }
 .dim-channel[aria-selected="true"] { border-color: color-mix(in srgb, var(--dim-blue) 43%, var(--dsw-alias-border-l2, #dfe1e5)); color: var(--dim-blue); background: color-mix(in srgb, var(--dim-blue) 12%, var(--dsw-alias-bg-layer-3, #fff)); box-shadow: 0 3px 12px rgb(51 112 255 / 7%); }
 .dim-channel:focus-visible { outline: none; border-color: color-mix(in srgb, var(--dim-blue) 72%, var(--dsw-alias-border-l2, #dfe1e5)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--dim-blue) 24%, transparent) inset, 0 3px 12px rgb(51 112 255 / 7%); }
-.dim-logo { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 9px; box-shadow: 0 1px 3px rgb(31 35 41 / 7%); }
-.dim-logo svg { display: block; width: 20px; height: 20px; }
 .dim-logoWeixin { color: white; background: #07c160; }
 .dim-logoWeixin svg { width: 19px; height: 19px; }
-.dim-logoFeishu { background: white; border: 1px solid var(--dsw-alias-border-l2, #e5e6eb); }
-.dim-logoFeishu svg { width: 28px; height: 28px; }
-.dim-logoDingtalk { color: white; background: #1677ff; }
-.dim-logoDingtalk svg { width: 24px; height: 24px; }
-.dim-logoWecom { background: white; border: 1px solid var(--dsw-alias-border-l2, #e5e6eb); }
-.dim-logoWecom svg { width: 22px; height: 22px; }
-.dim-logoTelegram { color: white; background: #229ed9; }
-.dim-logoTelegram svg { width: 21px; height: 21px; }
-.dim-logoOffice { color: white; background: linear-gradient(145deg, #12213f, #3964fe); }
-.dim-logoOffice svg { width: 23px; height: 23px; }
-.dim-logoDiscord { color: white; background: #5865f2; }
-.dim-logoDiscord svg { width: 21px; height: 21px; }
-.dim-logoSlack { color: white; background: #4a154b; }
-.dim-logoSlack svg { width: 21px; height: 21px; }
-.dim-logoWhatsapp { color: white; background: #25d366; }
-.dim-logoWhatsapp svg { width: 21px; height: 21px; }
 .dim-channelCopy { min-width: 0; display: grid; }
 .dim-channelCopy strong { overflow: hidden; color: inherit; font-size: 14px; line-height: 20px; font-weight: 680; text-overflow: ellipsis; white-space: nowrap; }
 .dim-channelNote { overflow: hidden; color: var(--dsw-alias-label-tertiary, #8f959e); font-size: 10px; line-height: 13px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
