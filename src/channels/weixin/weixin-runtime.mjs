@@ -323,8 +323,9 @@ export class WeixinRuntime {
     if (!toUserId) throw connectionTestTargetUnavailable('微信机器人');
 
     // 带缓存的 context_token 发送；token 过期时微信返回 ret=-2 "prepare failed"
-    // （stale context token，与限流不同）。此时清除缓存的 token 后做一次无 token
-    // 重试：bot 长轮询在线且账号有效时，无 token 的主动发送可以成功。
+    // （stale context token，与限流不同）。清除缓存 token 后的"无 token 发送"
+    // 依赖 bot 长轮询（getupdates）活跃——会话在线时无 token 主动发送可成功
+    // （2026-08-31 实测验证）。因此重试前若 runtime 未就绪，先拉起长轮询。
     const sendOnce = (contextToken) => this.#api.sendText({
       baseUrl: this.#config.baseUrl,
       token: this.#token,
@@ -342,6 +343,17 @@ export class WeixinRuntime {
       if (!isStaleContextTokenError(error)) throw error;
       // stale context token: 清除缓存后无 token 重试一次（不消耗调用方重试预算）
       await this.#state.clearContextToken().catch(() => undefined);
+      // 确保长轮询活跃：runtime 未就绪时先拉起（notifystart + getupdates），
+      // 再等几秒让轮询建立，无 token 发送才有机会成功。
+      if (!this.#status.ready) {
+        try {
+          await this.start();
+          await new Promise((resolve) => setTimeout(resolve, 3_000));
+        } catch (startError) {
+          // 拉起失败不阻断：仍尝试一次无 token 发送，由结果决定是否抛 stale-session
+          this.#logger?.warn?.('[dsh-weixin] stale-token recovery: runtime start failed:', startError?.message ?? String(startError));
+        }
+      }
       try {
         await sendOnce(undefined);
         return { sent: true };
@@ -349,8 +361,8 @@ export class WeixinRuntime {
         if (isStaleContextTokenError(retryError)) {
           throw new WeixinApiError(
             'stale-session',
-            '微信会话已过期（sendmessage 无有效 context_token），需要用户给机器人发一条消息重新激活；'
-            + '已清除缓存 token，收到新消息后会自动恢复。',
+            '微信会话已过期（sendmessage 无有效 context_token），且无 token 恢复发送也失败；'
+            + '需要用户给机器人发一条消息重新激活会话。已清除缓存 token，收到新消息后自动恢复。',
             { cause: retryError },
           );
         }
